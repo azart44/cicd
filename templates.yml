@@ -1,0 +1,47 @@
+
+
+.terraform:
+  image:
+    name: hashicorp/terraform:latest
+  # tags:
+  #   - gitlab-runner-aws-niv-oniiva
+
+# .sonar:
+#   stage: Vérification du code
+#   image:
+#     name: sonarsource/sonar-scanner-cli:latest
+#     entrypoint: [""]
+#   variables:
+#     GIT_DEPTH: "0"
+#   script:
+#     - !reference [.sonar_check, script]
+#   tags:
+#     - gitlab-runner-aws-niv-oniiva
+
+.plan:
+  extends: .terraform
+  stage: Planification du déploiement
+  script:
+    - !reference [.determine_environment, script]
+    - !reference [.plan, script]
+  artifacts:
+    paths:
+      - $TF_ROOT/$ENV/plan.tfout
+    expire_in: 30 mins
+
+
+.deploy:
+  extends: .terraform
+  stage: Déploiement de l'infrastructure
+  script:
+    - !reference [.determine_environment, script]
+    - !reference [.apply, script]
+  when: manual
+
+.destroy:
+  extends: .terraform
+  stage: Destruction de l'infrastructure
+  script:
+    - !reference [.determine_environment, script]
+    - !reference [.destroy, script]
+  when: manual

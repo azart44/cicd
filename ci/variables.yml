@@ -1,0 +1,6 @@
+variables:
+  TF_ROOT: ./terraform/env
+  TF_INPUT: 0
+  TF_IN_AUTOMATION: "true"
+  TF_VAR_git_url: ${CI_PROJECT_URL}
+  TF_VAR_secret_key: ${AZURE_SECRET_ACCESS_KEY}

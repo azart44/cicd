@@ -1,0 +1,69 @@
+.determine_environment:
+  script:
+    - |
+      echo "======== Determining environment based on job name ========"
+      if [[ "$CI_JOB_NAME" == *":stg"* ]]; then
+        export ENV=stg
+      elif [[ "$CI_JOB_NAME" == *":prd"* ]]; then
+        export ENV=prd
+      elif [[ "$CI_JOB_NAME" == *":dev"*  ]]; then
+        export ENV=dev
+      else
+        echo "No matching environment found for job name: $CI_JOB_NAME"
+        exit 1
+      fi
+
+.configure_git_url:
+  script:
+    - |
+      echo "======== Configuring Git URL ========"
+      git config --global url."https://$TF_MODULE_USR:$TF_MODULE_TOKEN@gitlab.com".insteadOf "https://gitlab.com/"
+
+
+.change_directory:
+  script:
+    - |
+      echo "======== Changing directory to $TF_ROOT ========"
+      cd $TF_ROOT/$ENV
+
+.plan:
+  script:
+    - |
+      echo "======== Terraform version ========"
+      terraform --version
+    - |
+      echo "======== Initializing Terraform ========"
+      terraform init
+    - |
+      echo "======== Running Terraform plan ========"
+      terraform plan -out=plan-$ENV.tfout
+
+.apply:
+  script:
+    - |
+      echo "======== Terraform version ========"
+      terraform --version
+    - |
+      echo "======== Initializing Terraform ========"
+      terraform init
+    - |
+      echo "======== Applying Terraform plan ========"
+      terraform apply plan-$ENV.tfout
+
+.destroy:
+  script:
+    - |
+      echo "======== Terraform version ========"
+      terraform --version
+    - |
+      echo "======== Initializing Terraform ========"
+      terraform init
+    - |
+      echo "======== Destroying infrastructure ========"
+      terraform destroy -auto-approve
+
+.sonar_check:
+  script:
+    - |
+      echo "======== Running SonarQube analysis ========"
+      sonar-scanner -Dsonar.projectKey=niv-oniiva-$CI_PROJECT_NAME

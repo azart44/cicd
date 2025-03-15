@@ -1,0 +1,7 @@
+.dev_only:
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^develop$/ || $CI_COMMIT_BRANCH =~ /^feature\/.*/ || $CI_COMMIT_BRANCH =~ /^fix\/.*/
+
+.prod_only:
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(main|master)$/

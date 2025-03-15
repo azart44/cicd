@@ -1,0 +1,109 @@
+include:
+  - local: ci/variables.yml
+  - local: ci/before_script.yml
+  - local: ci/rules.yml
+  - local: ci/templates.yml
+  - local: ci/scripts.yml
+
+stages:
+  # - Vérification du code
+  - Planification du déploiement
+  - Déploiement de l'infrastructure
+  - Destruction de l'infrastructure
+
+# sonarqube-check:
+#   extends:
+#     - .sonar
+
+plan:dev:
+  extends:
+    - .plan
+    - .dev_only
+  variables:
+    ENV: dev
+  artifacts:
+    paths:
+      - $TF_ROOT/$ENV/plan-$ENV.tfout
+    expire_in: 30 mins
+
+plan:stg:
+  extends:
+    - .plan
+    - .prod_only
+  variables:
+    ENV: stg
+  artifacts:
+    paths:
+      - $TF_ROOT/$ENV/plan-$ENV.tfout
+    expire_in: 30 mins
+
+plan:prd:
+  extends:
+    - .plan
+    - .prod_only
+  variables:
+    ENV: prod
+  when: manual
+  needs:
+    - job: plan:stg
+  artifacts:
+    paths:
+      - $TF_ROOT/$ENV/plan-$ENV.tfout
+    expire_in: 30 mins
+
+deploy:dev:
+  extends:
+    - .deploy
+    - .dev_only
+  environment:
+    name: dev
+  needs:
+    - job: plan:dev
+      artifacts: true
+
+deploy:stg:
+  extends:
+    - .deploy
+    - .prod_only
+  environment:
+    name: stg
+  needs:
+    - job: plan:stg
+      artifacts: true
+
+deploy:prd:
+  extends:
+    - .deploy
+    - .prod_only
+  environment:
+    name: prod
+  needs:
+    - job: plan:prd
+      artifacts: true
+
+destroy:dev:
+  extends:
+    - .destroy
+    - .dev_only
+  environment:
+    name: dev
+    action: stop
+
+destroy:stg:
+  extends:
+    - .destroy
+    - .prod_only
+  environment:
+    name: stg
+    action: stop
+
+destroy:prd:
+  extends:
+    - .destroy
+    - .prod_only
+  environment:
+    name: prod
+    action: stop
+  needs:
+    - job: destroy:stg
+      artifacts: false
