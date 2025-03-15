@@ -1,10 +1,7 @@
-
-
 .terraform:
   image:
     name: hashicorp/terraform:latest
-  # tags:
-  #   - gitlab-runner-aws-niv-oniiva
+    entrypoint: [""]
 
 # .sonar:
 #   stage: Vérification du code

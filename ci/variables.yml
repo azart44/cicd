@@ -4,3 +4,12 @@ variables:
   TF_IN_AUTOMATION: "true"
   TF_VAR_git_url: ${CI_PROJECT_URL}
   TF_VAR_secret_key: ${AZURE_SECRET_ACCESS_KEY}
+  TF_STATE_NAME: ${TF_STATE_NAME:-default}
+  TF_ADDRESS: "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}"
+  TF_LOCK_ADDRESS: "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+  TF_UNLOCK_ADDRESS: "https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/terraform/state/${TF_STATE_NAME}/lock"
+  TF_USERNAME: ${GITLAB_USER_LOGIN}
+  TF_PASSWORD: ${GITLAB_ACCESS_TOKEN}
+  TF_LOCK_METHOD: "POST"
+  TF_UNLOCK_METHOD: "DELETE"
+  TF_RETRY_WAIT_MIN: "5"
